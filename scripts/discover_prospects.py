@@ -50,6 +50,17 @@ BLOCKED_DOMAINS = {
     "twitter.com",
     "tiktok.com",
     "reddit.com",
+    "craigslist.org",
+    "gaf.com",
+    "supplyhouse.com",
+}
+BLOCKED_URL_PARTS = {
+    "/location/",
+    "/locations/",
+    "/roofing-contractors/",
+    "/find-a-pro/",
+    "/contractor/",
+    "/dealers/",
 }
 CONTACT_TEXT_HINTS = ["contact", "request quote", "free estimate", "book now", "schedule"]
 EMAIL_PATTERN = re.compile(r"[A-Z0-9._%+-]+@[A-Z0-9.-]+\.[A-Z]{2,}", re.IGNORECASE)
@@ -83,7 +94,7 @@ def parse_args() -> argparse.Namespace:
     parser.add_argument("--markets-per-run", type=int, default=4, help="How many cities to process per run")
     parser.add_argument("--queries-per-market", type=int, default=1, help="How many queries to use per market/niche")
     parser.add_argument("--results-per-query", type=int, default=8, help="Search results to request per query")
-    parser.add_argument("--timeout", type=int, default=18, help="HTTP timeout")
+    parser.add_argument("--timeout", type=int, default=10, help="HTTP timeout")
     parser.add_argument("--ai", action="store_true", help="Use OpenAI to enrich summaries")
     parser.add_argument("--dry-run", action="store_true", help="Print planned queries without calling external APIs")
     return parser.parse_args()
@@ -122,7 +133,10 @@ def root_domain(url: str) -> str:
 
 def blocked_domain(url: str) -> bool:
     hostname = root_domain(url)
-    return any(hostname == blocked or hostname.endswith(f".{blocked}") for blocked in BLOCKED_DOMAINS)
+    lower_url = url.lower()
+    return any(hostname == blocked or hostname.endswith(f".{blocked}") for blocked in BLOCKED_DOMAINS) or any(
+        part in lower_url for part in BLOCKED_URL_PARTS
+    )
 
 
 def market_slice(markets: list[dict[str, str]], count: int) -> list[dict[str, str]]:

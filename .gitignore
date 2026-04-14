@@ -3,5 +3,9 @@
 __pycache__/
 .playwright-cli/
 *.pyc
-output/*.csv
-output/*.md
+output/*
+!output/.gitkeep
+!output/fresh-prospects.csv
+!output/discovered-prospects.csv
+!output/discovery-summary.md
+!output/fresh-outreach.csv
