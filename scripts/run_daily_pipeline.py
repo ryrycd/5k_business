@@ -44,12 +44,18 @@ def main() -> int:
         FRESH_OUTREACH.write_text("", encoding="utf-8")
 
     run_step([sys.executable, "scripts/sync_lead_state.py"])
+    run_step([sys.executable, "scripts/enrich_contact_paths.py"])
+    run_step([sys.executable, "scripts/generate_audit_pages.py"])
     run_step([sys.executable, "scripts/ingest_replies.py"])
 
     send_command = [sys.executable, "scripts/send_outreach.py"]
     if os.getenv("SEND_LIVE_OUTREACH", "").strip().lower() in {"1", "true", "yes"}:
         send_command.append("--live")
     run_step(send_command)
+    form_command = [sys.executable, "scripts/submit_contact_forms.py"]
+    if os.getenv("SEND_LIVE_FORMS", "").strip().lower() in {"1", "true", "yes"}:
+        form_command.append("--live")
+    run_step(form_command)
     run_step([sys.executable, "scripts/report_lead_state.py"])
 
     return 0

@@ -202,6 +202,52 @@ def likely_contact_links(html: str, resolved_url: str) -> list[str]:
     return deduped[:2]
 
 
+def parse_form_fields(form: Any) -> list[dict[str, str]]:
+    fields: list[dict[str, str]] = []
+    for element in form.find_all(["input", "textarea", "select"]):
+        name = str(element.get("name") or element.get("id") or "").strip()
+        if not name:
+            continue
+        field_type = str(element.get("type") or element.name or "text").strip().lower()
+        value = str(element.get("value") or "").strip()
+        required = "true" if element.has_attr("required") else "false"
+        fields.append({"name": name, "type": field_type, "value": value, "required": required})
+    return fields
+
+
+def detect_contact_form(html: str, resolved_url: str, timeout: int) -> dict[str, str]:
+    candidates = [(resolved_url, html)]
+    for link in likely_contact_links(html, resolved_url):
+        try:
+            follow_html, follow_url = fetch_homepage(link, timeout=timeout)
+            candidates.append((follow_url, follow_html))
+        except Exception:  # noqa: BLE001
+            continue
+
+    for page_url, page_html in candidates:
+        soup = BeautifulSoup(page_html, "html.parser")
+        for form in soup.find_all("form"):
+            action = urljoin(page_url, str(form.get("action") or page_url))
+            method = str(form.get("method") or "post").strip().lower()
+            fields = parse_form_fields(form)
+            if not fields:
+                continue
+            field_names = " ".join(field["name"].lower() for field in fields)
+            if any(token in field_names for token in ["email", "message", "comment", "name", "phone"]):
+                return {
+                    "contact_page_url": page_url,
+                    "contact_form_url": action,
+                    "contact_form_method": method,
+                    "contact_form_fields_json": json.dumps(fields, separators=(",", ":")),
+                }
+    return {
+        "contact_page_url": "",
+        "contact_form_url": "",
+        "contact_form_method": "",
+        "contact_form_fields_json": "",
+    }
+
+
 def extract_contact_details(text: str) -> tuple[list[str], list[str]]:
     emails = sorted(
         {
@@ -240,6 +286,10 @@ def empty_index_row() -> dict[str, str]:
         "niche": "",
         "email": "",
         "phone": "",
+        "contact_page_url": "",
+        "contact_form_url": "",
+        "contact_form_method": "",
+        "contact_form_fields_json": "",
         "page_title": "",
         "meta_description": "",
         "opportunity_score": "",
@@ -312,6 +362,7 @@ def build_row(
             "niche": niche,
             "email": prospect.email,
             "phone": prospect.phone,
+            **detect_contact_form(html, resolved_url, timeout),
             "page_title": site["title"],
             "meta_description": site["meta_description"],
             "opportunity_score": str(score),

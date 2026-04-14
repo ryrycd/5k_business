@@ -34,6 +34,7 @@ jobs:
           SENDER_COMPANY: ${{ secrets.SENDER_COMPANY }}
           SENDER_PHONE: ${{ secrets.SENDER_PHONE }}
           SENDER_ADDRESS: ${{ secrets.SENDER_ADDRESS }}
+          PUBLIC_BASE_URL: ${{ secrets.PUBLIC_BASE_URL }}
           SMTP_HOST: ${{ secrets.SMTP_HOST }}
           SMTP_PORT: ${{ secrets.SMTP_PORT }}
           SMTP_USERNAME: ${{ secrets.SMTP_USERNAME }}
@@ -42,6 +43,7 @@ jobs:
           SMTP_USE_TLS: ${{ secrets.SMTP_USE_TLS }}
           REPLY_TO_EMAIL: ${{ secrets.REPLY_TO_EMAIL }}
           SEND_LIVE_OUTREACH: ${{ secrets.SEND_LIVE_OUTREACH }}
+          SEND_LIVE_FORMS: ${{ secrets.SEND_LIVE_FORMS }}
           IMAP_HOST: ${{ secrets.IMAP_HOST }}
           IMAP_PORT: ${{ secrets.IMAP_PORT }}
           IMAP_USERNAME: ${{ secrets.IMAP_USERNAME }}
@@ -54,8 +56,9 @@ jobs:
         run: |
           git config user.name "github-actions[bot]"
           git config user.email "41898282+github-actions[bot]@users.noreply.github.com"
-          touch output/fresh-prospects.csv output/discovered-prospects.csv output/discovery-summary.md output/fresh-outreach.csv output/send-queue.csv output/lead-state-summary.md
-          git add data/prospect_index.csv data/lead_state.csv data/suppression_list.csv data/send_log.csv data/reply_log.csv data/inbox_state.json
-          git add -f output/fresh-prospects.csv output/discovered-prospects.csv output/discovery-summary.md output/fresh-outreach.csv output/send-queue.csv output/lead-state-summary.md
+          touch output/fresh-prospects.csv output/discovered-prospects.csv output/discovery-summary.md output/fresh-outreach.csv output/send-queue.csv output/lead-state-summary.md output/form-queue.csv
+          git add data/prospect_index.csv data/lead_state.csv data/suppression_list.csv data/send_log.csv data/reply_log.csv data/inbox_state.json data/form_log.csv
+          git add site/generated-audits
+          git add -f output/fresh-prospects.csv output/discovered-prospects.csv output/discovery-summary.md output/fresh-outreach.csv output/send-queue.csv output/lead-state-summary.md output/form-queue.csv
           git diff --cached --quiet || git commit -m "chore: refresh daily prospect discovery"
           git push

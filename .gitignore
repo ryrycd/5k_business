@@ -11,3 +11,4 @@ output/*
 !output/fresh-outreach.csv
 !output/send-queue.csv
 !output/lead-state-summary.md
+!output/form-queue.csv

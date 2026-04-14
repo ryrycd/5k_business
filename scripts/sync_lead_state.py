@@ -52,11 +52,18 @@ def blank_lead() -> dict[str, str]:
 def refresh_status(existing: dict[str, str], suppressed: bool) -> tuple[str, str]:
     status = (existing.get("status") or "").strip()
     send_count = to_int(existing.get("send_count"))
+    form_submission_count = to_int(existing.get("form_submission_count"))
     if suppressed:
         return "opted_out", "suppressed"
     if status in TERMINAL_STATUSES or status in REPLIED_STATUSES:
         return status, existing.get("status_reason", "")
     if not normalize_email(existing.get("email", "")):
+        if existing.get("contact_form_url", "").strip():
+            if form_submission_count == 0:
+                return "form_ready", "contact_form_available"
+            if form_submission_count == 1:
+                return "form_submitted_1", existing.get("status_reason", "form_follow_up_pending")
+            return "form_submitted_2", existing.get("status_reason", "form_sequence_complete")
         return "needs_contact_path", "missing_email"
     if send_count == 0:
         return "ready", "fresh_email_target"
@@ -81,6 +88,10 @@ def merge_lead(existing: dict[str, str], prospect: dict[str, str], outreach: dic
     merged["domain"] = prospect.get("domain", merged.get("domain", "")) or merged["lead_id"]
     merged["email"] = normalize_email(prospect.get("email", merged.get("email", "")))
     merged["phone"] = prospect.get("phone", merged.get("phone", ""))
+    merged["contact_page_url"] = prospect.get("contact_page_url", merged.get("contact_page_url", ""))
+    merged["contact_form_url"] = prospect.get("contact_form_url", merged.get("contact_form_url", ""))
+    merged["contact_form_method"] = prospect.get("contact_form_method", merged.get("contact_form_method", ""))
+    merged["contact_form_fields_json"] = prospect.get("contact_form_fields_json", merged.get("contact_form_fields_json", ""))
     merged["page_title"] = prospect.get("page_title", merged.get("page_title", ""))
     merged["meta_description"] = prospect.get("meta_description", merged.get("meta_description", ""))
     merged["opportunity_score"] = prospect.get("opportunity_score", merged.get("opportunity_score", ""))
@@ -106,7 +117,10 @@ def merge_lead(existing: dict[str, str], prospect: dict[str, str], outreach: dic
     status, reason = refresh_status(merged, suppressed)
     merged["status"] = status
     merged["status_reason"] = reason
+    merged["outreach_channel"] = "email" if merged.get("email") else "contact_form" if merged.get("contact_form_url") else "none"
     if status == "ready" and not merged.get("next_contact_at"):
+        merged["next_contact_at"] = now_timestamp()
+    if status == "form_ready" and not merged.get("next_contact_at"):
         merged["next_contact_at"] = now_timestamp()
     return merged
 

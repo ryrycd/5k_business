@@ -65,10 +65,15 @@ def subject_for_stage(row: dict[str, str], stage: str) -> str:
 
 def body_for_stage(row: dict[str, str], stage: str) -> str:
     if stage == "initial":
-        return row.get("email_body", "")
-    if stage == "follow_up_1":
-        return row.get("follow_up_1", "")
-    return row.get("follow_up_2", "")
+        body = row.get("email_body", "")
+    elif stage == "follow_up_1":
+        body = row.get("follow_up_1", "")
+    else:
+        body = row.get("follow_up_2", "")
+    audit_url = (row.get("audit_page_url") or "").strip()
+    if audit_url and audit_url not in body:
+        body = f"{body}\n\nQuick audit page:\n{audit_url}".strip()
+    return body
 
 
 def next_stage(row: dict[str, str]) -> str | None:

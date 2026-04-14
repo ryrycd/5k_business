@@ -67,6 +67,14 @@ Ingest and classify inbox replies:
 python3 scripts/ingest_replies.py
 ```
 
+Generate audit pages and contact-form queueing:
+
+```bash
+python3 scripts/enrich_contact_paths.py
+python3 scripts/generate_audit_pages.py
+python3 scripts/submit_contact_forms.py
+```
+
 Dry run to inspect the rotating query plan:
 
 ```bash

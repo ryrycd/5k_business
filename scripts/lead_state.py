@@ -24,6 +24,11 @@ LEAD_FIELDS = [
     "domain",
     "email",
     "phone",
+    "contact_page_url",
+    "contact_form_url",
+    "contact_form_method",
+    "contact_form_fields_json",
+    "outreach_channel",
     "page_title",
     "meta_description",
     "opportunity_score",
@@ -53,12 +58,25 @@ LEAD_FIELDS = [
     "is_suppressed",
     "thread_message_id",
     "last_message_id",
+    "form_submission_count",
+    "last_form_submitted_at",
+    "audit_page_path",
+    "audit_page_url",
     "notes",
 ]
 
 SUPPRESSION_FIELDS = ["created_at", "value", "type", "reason", "source", "notes"]
 SEND_LOG_FIELDS = ["sent_at", "lead_id", "stage", "to_email", "subject", "message_id", "delivery_mode", "result", "error"]
 REPLY_LOG_FIELDS = ["received_at", "lead_id", "from_email", "subject", "classification", "message_id", "uid", "excerpt"]
+FORM_LOG_FIELDS = [
+    "submitted_at",
+    "lead_id",
+    "form_url",
+    "method",
+    "result",
+    "status_code",
+    "error",
+]
 EMAIL_REGEX = re.compile(r"^[A-Z0-9._%+-]+@[A-Z0-9.-]+\.[A-Z]{2,}$", re.IGNORECASE)
 
 TERMINAL_STATUSES = {"opted_out", "bounced", "closed_won", "closed_lost"}
@@ -186,7 +204,7 @@ def add_suppression(
 def sort_leads(rows: list[dict[str, str]]) -> list[dict[str, str]]:
     def sort_key(row: dict[str, str]) -> tuple[int, int, str]:
         status = row.get("status", "")
-        status_rank = 0 if status == "ready" else 1 if status.startswith("sent_") else 2
+        status_rank = 0 if status in {"ready", "form_ready"} else 1 if status.startswith(("sent_", "form_submitted_")) else 2
         return (
             status_rank,
             -to_int(row.get("opportunity_score")),
