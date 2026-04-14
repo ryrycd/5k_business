@@ -2,6 +2,7 @@
 from __future__ import annotations
 
 import csv
+import os
 import subprocess
 import sys
 from pathlib import Path
@@ -41,6 +42,15 @@ def main() -> int:
         )
     else:
         FRESH_OUTREACH.write_text("", encoding="utf-8")
+
+    run_step([sys.executable, "scripts/sync_lead_state.py"])
+    run_step([sys.executable, "scripts/ingest_replies.py"])
+
+    send_command = [sys.executable, "scripts/send_outreach.py"]
+    if os.getenv("SEND_LIVE_OUTREACH", "").strip().lower() in {"1", "true", "yes"}:
+        send_command.append("--live")
+    run_step(send_command)
+    run_step([sys.executable, "scripts/report_lead_state.py"])
 
     return 0
 

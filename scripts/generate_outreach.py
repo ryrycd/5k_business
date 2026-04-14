@@ -184,11 +184,18 @@ def main() -> int:
         rendered = ai_enrichment(client, model, row, sender) if client is not None else render_rule_based_email(row, sender)
         generated.append(
             {
+                "lead_id": row.get("lead_id", row.get("domain", "")),
+                "domain": row.get("domain", ""),
+                "website": row.get("website", ""),
+                "resolved_url": row.get("resolved_url", ""),
                 "business_name": row.get("business_name", ""),
                 "email": row.get("email", ""),
                 "city": row.get("city", ""),
                 "state": row.get("state", ""),
                 "niche": row.get("niche", ""),
+                "source_query": row.get("source_query", ""),
+                "opportunity_score": row.get("opportunity_score", ""),
+                "opportunity_band": row.get("opportunity_band", ""),
                 **rendered,
             }
         )

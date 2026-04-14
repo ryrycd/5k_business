@@ -29,6 +29,24 @@ jobs:
           BRAVE_SEARCH_API_KEY: ${{ secrets.BRAVE_SEARCH_API_KEY }}
           OPENAI_API_KEY: ${{ secrets.OPENAI_API_KEY }}
           OPENAI_MODEL: ${{ secrets.OPENAI_MODEL }}
+          SENDER_NAME: ${{ secrets.SENDER_NAME }}
+          SENDER_EMAIL: ${{ secrets.SENDER_EMAIL }}
+          SENDER_COMPANY: ${{ secrets.SENDER_COMPANY }}
+          SENDER_PHONE: ${{ secrets.SENDER_PHONE }}
+          SENDER_ADDRESS: ${{ secrets.SENDER_ADDRESS }}
+          SMTP_HOST: ${{ secrets.SMTP_HOST }}
+          SMTP_PORT: ${{ secrets.SMTP_PORT }}
+          SMTP_USERNAME: ${{ secrets.SMTP_USERNAME }}
+          SMTP_PASSWORD: ${{ secrets.SMTP_PASSWORD }}
+          SMTP_FROM_EMAIL: ${{ secrets.SMTP_FROM_EMAIL }}
+          SMTP_USE_TLS: ${{ secrets.SMTP_USE_TLS }}
+          REPLY_TO_EMAIL: ${{ secrets.REPLY_TO_EMAIL }}
+          SEND_LIVE_OUTREACH: ${{ secrets.SEND_LIVE_OUTREACH }}
+          IMAP_HOST: ${{ secrets.IMAP_HOST }}
+          IMAP_PORT: ${{ secrets.IMAP_PORT }}
+          IMAP_USERNAME: ${{ secrets.IMAP_USERNAME }}
+          IMAP_PASSWORD: ${{ secrets.IMAP_PASSWORD }}
+          IMAP_FOLDER: ${{ secrets.IMAP_FOLDER }}
         run: |
           python scripts/run_daily_pipeline.py
 
@@ -36,8 +54,8 @@ jobs:
         run: |
           git config user.name "github-actions[bot]"
           git config user.email "41898282+github-actions[bot]@users.noreply.github.com"
-          touch output/fresh-prospects.csv output/discovered-prospects.csv output/discovery-summary.md output/fresh-outreach.csv
-          git add data/prospect_index.csv
-          git add -f output/fresh-prospects.csv output/discovered-prospects.csv output/discovery-summary.md output/fresh-outreach.csv
+          touch output/fresh-prospects.csv output/discovered-prospects.csv output/discovery-summary.md output/fresh-outreach.csv output/send-queue.csv output/lead-state-summary.md
+          git add data/prospect_index.csv data/lead_state.csv data/suppression_list.csv data/send_log.csv data/reply_log.csv data/inbox_state.json
+          git add -f output/fresh-prospects.csv output/discovered-prospects.csv output/discovery-summary.md output/fresh-outreach.csv output/send-queue.csv output/lead-state-summary.md
           git diff --cached --quiet || git commit -m "chore: refresh daily prospect discovery"
           git push

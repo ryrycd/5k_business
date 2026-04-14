@@ -203,7 +203,13 @@ def likely_contact_links(html: str, resolved_url: str) -> list[str]:
 
 
 def extract_contact_details(text: str) -> tuple[list[str], list[str]]:
-    emails = sorted(set(EMAIL_PATTERN.findall(text)))
+    emails = sorted(
+        {
+            email.strip().lower()
+            for email in EMAIL_PATTERN.findall(text)
+            if "." in email.split("@", 1)[-1] and not email.lower().endswith((".png", ".jpg", ".jpeg", ".svg", ".webp"))
+        }
+    )
     phones = sorted(set(match.strip() for match in PHONE_PATTERN.findall(text)))
     return emails, phones
 

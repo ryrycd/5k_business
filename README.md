@@ -15,6 +15,7 @@ Start here:
 3. Read [docs/discovery-system.md](./docs/discovery-system.md).
 4. Preview the offer page in [site/index.html](./site/index.html).
 5. Use [data/prospects-template.csv](./data/prospects-template.csv) only if you want to hand-seed prospects.
+6. Read [docs/outbound-system.md](./docs/outbound-system.md).
 
 ## Workspace layout
 
@@ -45,6 +46,25 @@ Run the daily discovery + outreach queue pipeline:
 
 ```bash
 python3 scripts/run_daily_pipeline.py
+```
+
+Sync fresh prospects into durable lead state:
+
+```bash
+python3 scripts/sync_lead_state.py
+```
+
+Preview or send the next outreach batch:
+
+```bash
+python3 scripts/send_outreach.py
+python3 scripts/send_outreach.py --live
+```
+
+Ingest and classify inbox replies:
+
+```bash
+python3 scripts/ingest_replies.py
 ```
 
 Dry run to inspect the rotating query plan:

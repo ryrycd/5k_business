@@ -9,3 +9,5 @@ output/*
 !output/discovered-prospects.csv
 !output/discovery-summary.md
 !output/fresh-outreach.csv
+!output/send-queue.csv
+!output/lead-state-summary.md
